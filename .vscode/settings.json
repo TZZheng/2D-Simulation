@@ -1,6 +1,11 @@
 {
     "files.associations": {
         "*.m": "matlab",
-        "iostream": "cpp"
+        "iostream": "cpp",
+        "cmath": "cpp",
+        "streambuf": "cpp",
+        "xmemory0": "cpp",
+        "xstring": "cpp",
+        "xutility": "cpp"
     }
 }
