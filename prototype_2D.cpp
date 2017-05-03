@@ -238,9 +238,12 @@ int main(){
             }
             if (total_carrier>12500){
                 jitter_dist[pointer] = counter;
-                cout<<counter<<endl;
             }
+            else{
+            	jitter_dist[pointer] = 0;
+            } 
             pointer=pointer+1;
+            //cout<<counter<<endl;
         }
         cout<<i<<endl;
     }
