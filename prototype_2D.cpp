@@ -44,22 +44,22 @@ double pos_h_temp1[numarray]={0};
 double t_h_next[numarray]={0};
 int  if_active_h[numarray]={0};
 int main(){
-    double E_field0 = 350000;
-    double E_field = 350000; //unit:V/cm
+    double E_field0 = 3.5e5;
+    double E_field = 3.5e5; //unit:V/cm
     double Eth_e = 1.2; //unit:eV
     double Eth_h = 1.5; //unit:eV
-    double width_z = 1.6e-003; //unit: cm
+    double width_z = 1.6e-3; //unit: cm
     double width_x = 2e-002;
     double width_y = 2e-002;
-    double v = 10000000; //assume maximum velocity,cm/s
+    double v = 1e7; //assume maximum velocity,cm/s
     double q = 1.602e-019;
     double t_resolution = 1e-014;
     double D_z = 20; //cm^2/s
-    double D_r = 100; //cm^2/s
-    double R = 75000; //unit:Ohm/um^2
+    double D_r = 0; //cm^2/s
+    double R = 0; //unit:Ohm/um^2
 
-    double alpha_e = 1286000*exp(-1400000/E_field); // unit: /s POSSIBLE MODEL USED IN JIAN PAPER
-    double alpha_h = 1438000*exp(-2020000/E_field);// unit: /s POSSIBLE MODEL USED IN JIAN PAPER
+    double alpha_e = 1.286e6*exp(-1.4e6/E_field); // unit: /s POSSIBLE MODEL USED IN JIAN PAPER
+    double alpha_h = 1.438e6*exp(-2.02e6/E_field);// unit: /s POSSIBLE MODEL USED IN JIAN PAPER
     double d_e = Eth_e/E_field;
     double d_h = Eth_h/E_field;
     double enabled_alpha_e = 1/(1/alpha_e - d_e);
@@ -81,7 +81,9 @@ int main(){
     double counter_I = 0;
     double I = 0;
     int total_e = 1;
+    int total_e_temp=1;
     int total_h = 1;
+    int total_h_temp=1;
     int loop_temp=0;
     
 	double min_x=0;
@@ -127,7 +129,7 @@ int main(){
             pos_e[0][2] = width_z/(absorption_bin)*i;
             pos_h[0][0] = 0;
             pos_h[0][1] = 0;
-            pos_e[0][2] = width_z/(absorption_bin)*i;
+            pos_h[0][2] = width_z/(absorption_bin)*i;
             total_carrier=2;
             total_e=1;
 			total_h=1; 
@@ -142,16 +144,20 @@ int main(){
                 enabled_alpha_e = 1/(1/alpha_e - d_e);
                 enabled_alpha_h = 1/(1/alpha_h - d_h);
                 counter = counter+1;
-                for(int j=0;j<total_e;++j){
+                total_e_temp=total_e;
+                for(int j=0;j<total_e_temp;++j){
                     if(if_active_e[j]>0){
-                        pos_e[j][2] = pos_e[j][2]+(v*t_resolution+diff_step_z*random())*1e3;
-                        pos_e[j][0] = pos_e[j][0]+(sqrt(2*D_r*t_resolution)*cos(random()*2*PI))*1e3;
-                        pos_e[j][1] = pos_e[j][1]+(sqrt(2*D_r*t_resolution)*sin(random()*2*PI))*1e3;
+                        pos_e[j][2] += (v*t_resolution+diff_step_z*(2*random()-1));
+                        //pos_e[j][0] = pos_e[j][0]+(sqrt(2*D_r*t_resolution)*cos(random()*2*PI))*1e3;
+                        //pos_e[j][1] = pos_e[j][1]+(sqrt(2*D_r*t_resolution)*sin(random()*2*PI))*1e3;
                         //TODO:  replace next function
-                        if(pos_e[j][2]>width_z*1000 or fabs(pos_e[j][0])>width_x*1000 or fabs(pos_e[j][1]>width_y*1000)){
+                        if(pos_e[j][2]>width_z or fabs(pos_e[j][0])>width_x or fabs(pos_e[j][1]>width_y)){
                             --total_carrier;
-                            if (pos_e[j][2] > width_z*1000){
+                            if (pos_e[j][2] > width_z){
                                 ++counter_I;
+                            }
+                            if(fabs(pos_e[j][0])>width_x || fabs(pos_e[j][1]>width_y)){
+                            	cout<<"bang!"<<endl;
                             }
                             t_e_next[j] = 999;
                             if_active_e[j] = 0;
@@ -179,16 +185,20 @@ int main(){
                         }
                     }
                 }
-                for(int j=0;j<total_h;++j){
+                total_h_temp=total_h;
+                for(int j=0;j<total_h_temp;++j){
                     if(if_active_h[j]>0){
-                        pos_h[j][2] = pos_h[j][2]-(v*t_resolution+diff_step_z*random())*1e3;
-                        pos_h[j][0] = pos_h[j][0]+(sqrt(2*D_r*t_resolution)*cos(random()*2*PI))*1e3;
-                        pos_h[j][1] = pos_h[j][1]+(sqrt(2*D_r*t_resolution)*sin(random()*2*PI))*1e3;
+                        pos_h[j][2] = pos_h[j][2]-(v*t_resolution+diff_step_z*(2*random()-1));
+                        pos_h[j][0] = pos_h[j][0]+(sqrt(2*D_r*t_resolution)*cos(random()*2*PI));
+                        pos_h[j][1] = pos_h[j][1]+(sqrt(2*D_r*t_resolution)*sin(random()*2*PI));
                         //TODO:  replace next function
-                        if(pos_h[j][2]<0 || fabs(pos_h[j][0])>width_x*1000 || fabs(pos_h[j][1]>width_y*1000)){
+                        if(pos_h[j][2]<0 || fabs(pos_h[j][0])>width_x || fabs(pos_h[j][1]>width_y)){
                             total_carrier=total_carrier-1;
-                            if (pos_h[j][2] > width_z*1000){
+                            if (pos_h[j][2] > width_z){
                                 counter_I = counter_I+1;
+                            }
+                            if(fabs(pos_h[j][0])>width_x || fabs(pos_h[j][1]>width_y)){
+                            	cout<<"bang!"<<endl;
                             }
                             t_h_next[j] = 999;
                             if_active_h[j] = 0;
@@ -218,7 +228,7 @@ int main(){
                 }
                 I=counter_I*q/t_resolution;
                 //find the max and min value to calculate square
-                if(total_carrier>200){
+                if(total_carrier>20000){
                 	for(int k=0;k<total_e;k++){
                     	pos_e_temp0[k]=pos_e[k][0];
                     	pos_e_temp1[k]=pos_e[k][1];
@@ -232,7 +242,7 @@ int main(){
                 	min_x=min(min_array(pos_e_temp0,total_e),min_array(pos_h_temp0,total_h));
                 	min_x=min(min_array(pos_e_temp1,total_e),min_array(pos_h_temp1,total_h));
                 	square=(max_x-min_x)*(max_y-min_y);
-                    E_field = E_field0-I*R/square/(width_z*1000);
+                    E_field = E_field0-I*R/square/(width_z);
                     //cout<<I<<"\t"<<square<<"\t"<<E_field<<endl;
                 }
             }
